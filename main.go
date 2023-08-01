@@ -1,7 +1,58 @@
 package main
 
-import "fmt"
+import (
+	"os"
+
+	"github.com/chiboycalix/hotel-booking-system-backend/common"
+	"github.com/chiboycalix/hotel-booking-system-backend/router"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/recover"
+)
 
 func main() {
-	fmt.Println("hey")
+	err := run()
+
+	if err != nil {
+		panic(err)
+	}
+}
+
+func run() error {
+	// init env
+	err := common.LoadEnv()
+	if err != nil {
+		return err
+	}
+
+	// init db
+	err = common.InitDB()
+	if err != nil {
+		return err
+	}
+
+	// defer closing db
+	defer common.CloseDB()
+
+	// create app
+	app := fiber.New()
+
+	// routes
+	router.UserRoute(app)
+	router.AuthRoutes(app)
+
+	// add basic middleware
+	app.Use(logger.New())
+	app.Use(recover.New())
+	app.Use(cors.New())
+
+	// start server
+	var port string
+	if port = os.Getenv("PORT"); port == "" {
+		port = "8010"
+	}
+	app.Listen(":" + port)
+
+	return nil
 }

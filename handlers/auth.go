@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/chiboycalix/hotel-booking-system-backend/common"
@@ -47,7 +48,13 @@ func RegisterUser(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(responses.UserResonse{Status: http.StatusInternalServerError, Message: "Something went wrong", Data: &fiber.Map{"error": err.Error()}})
 	}
-	return c.Status(http.StatusCreated).JSON(responses.UserResonse{Status: http.StatusCreated, Message: "User created successfully", Data: &fiber.Map{"user": result}})
+	// convert interface to string
+	jwt, err := utils.GenerateJWT(fmt.Sprint(result.InsertedID))
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(responses.UserResonse{Status: http.StatusInternalServerError, Message: "Failed to generate jwt", Data: &fiber.Map{"error": err.Error()}})
+	}
+
+	return c.Status(http.StatusCreated).JSON(responses.UserResonse{Status: http.StatusCreated, Message: "User created successfully", Data: &fiber.Map{"user": result, "token": jwt}})
 }
 
 func LoginUser(c *fiber.Ctx) error {

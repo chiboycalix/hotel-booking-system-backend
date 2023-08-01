@@ -38,14 +38,19 @@ func run() error {
 	// create app
 	app := fiber.New()
 
-	// routes
-	router.UserRoute(app)
-	router.AuthRoutes(app)
-
 	// add basic middleware
 	app.Use(logger.New())
 	app.Use(recover.New())
-	app.Use(cors.New())
+	app.Use(cors.New(cors.Config{
+		AllowHeaders:     "Origin,Content-Type,Accept,Content-Length,Accept-Language,Accept-Encoding,Connection,Access-Control-Allow-Origin",
+		AllowOrigins:     "*",
+		AllowCredentials: true,
+		AllowMethods:     "GET,POST,HEAD,PUT,DELETE,PATCH,OPTIONS",
+	}))
+
+	// routes
+	router.UserRoute(app)
+	router.AuthRoutes(app)
 
 	// start server
 	var port string

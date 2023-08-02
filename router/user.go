@@ -8,4 +8,7 @@ import (
 func UserRoute(app *fiber.App) {
 	userGroup := app.Group("/users")
 	userGroup.Get("/", handlers.GetAllUsers)
+	userGroup.Get("/:id", handlers.GetUser)
+	userGroup.Put("/:id", handlers.UpdateUser)
+	userGroup.Delete("/:id", handlers.DeleteUser)
 }

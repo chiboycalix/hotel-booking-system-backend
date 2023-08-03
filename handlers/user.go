@@ -74,13 +74,12 @@ func GetUser(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(responses.UserResonse{Status: http.StatusOK, Message: "User fetched successfully", Data: &fiber.Map{"user": user}})
 }
 func UpdateUser(c *fiber.Ctx) error {
-	// validate the body
+	userCollection := common.GetDBCollection("users")
 	b := new(UpdateUserDTO)
 	if err := c.BodyParser(b); err != nil {
 		return c.Status(http.StatusBadRequest).JSON(responses.UserResonse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": "Invalid body"}})
 	}
 
-	// get the id
 	id := c.Params("id")
 	if id == "" {
 		return c.Status(http.StatusBadRequest).JSON(responses.UserResonse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": "Id is required"}})
@@ -90,14 +89,11 @@ func UpdateUser(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(responses.UserResonse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": "Invalid Id"}})
 	}
 
-	// update the user
-	coll := common.GetDBCollection("users")
-	result, err := coll.UpdateOne(c.Context(), bson.M{"_id": objectId}, bson.M{"$set": b})
+	result, err := userCollection.UpdateOne(c.Context(), bson.M{"_id": objectId}, bson.M{"$set": b})
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(responses.UserResonse{Status: http.StatusInternalServerError, Message: "Failed to update user", Data: &fiber.Map{"error": err.Error()}})
 	}
 
-	// return the user
 	return c.Status(http.StatusOK).JSON(responses.UserResonse{Status: http.StatusOK, Message: "User update was successful", Data: &fiber.Map{"user": result}})
 }
 func DeleteUser(c *fiber.Ctx) error {

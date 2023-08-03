@@ -9,4 +9,9 @@ func AuthRoutes(app *fiber.App) {
 	authGroup := app.Group("/auth")
 	authGroup.Post("/register", handlers.RegisterUser)
 	authGroup.Post("/login", handlers.LoginUser)
+	authGroup.Post("/forget-password", handlers.ForgetPassword)
+	authGroup.Post("/reset-password", handlers.ResetPassword)
+	// authGroup.Post("/reset-password/:email", handlers.ResetPassword)
+	authGroup.Post("/verify-user", handlers.VerifyUser)
+	// authGroup.Post("/verify-user/:email", handlers.VerifyUser)
 }

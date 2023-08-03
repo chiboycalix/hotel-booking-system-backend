@@ -10,4 +10,5 @@ type User struct {
 	PhoneNumber int64  `json:"phoneNumber" bson:"phoneNumber"`
 	Location    string `json:"location" bson:"location"`
 	DateOfBirth string `json:"dateOfBirth" bson:"dateOfBirth"`
+	IsVerified  bool   `json:"isVerified" bson:"isVerified"`
 }

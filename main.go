@@ -13,7 +13,6 @@ import (
 
 func main() {
 	err := run()
-
 	if err != nil {
 		panic(err)
 	}
@@ -58,6 +57,5 @@ func run() error {
 		port = "8010"
 	}
 	app.Listen(":" + port)
-
 	return nil
 }

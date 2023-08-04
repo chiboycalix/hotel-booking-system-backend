@@ -126,7 +126,7 @@ func ForgetPassword(c *fiber.Ctx) error {
 	}
 
 	// send email
-	err = utils.SendMailService(result, "templates/forget-password.html")
+	err = utils.SendMailService(result, "templates/forget-password.html", "Forget Password")
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(responses.UserResonse{Status: http.StatusInternalServerError, Message: "Error sending mail", Data: &fiber.Map{"error": err.Error()}})
 	}
@@ -166,7 +166,7 @@ func ResetPassword(c *fiber.Ctx) error {
 	}
 
 	// send passowrd changed email
-	err = utils.SendMailService(result, "templates/password-changed.html")
+	err = utils.SendMailService(result, "templates/password-changed.html", "Password Changed")
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(responses.UserResonse{Status: http.StatusInternalServerError, Message: "Error sending mail", Data: &fiber.Map{"error": err.Error()}})
 	}

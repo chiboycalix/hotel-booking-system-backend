@@ -50,7 +50,6 @@ func run() error {
 	// routes
 	router.UserRoute(app)
 	router.AuthRoutes(app)
-
 	// start server
 	var port string
 	if port = os.Getenv("PORT"); port == "" {

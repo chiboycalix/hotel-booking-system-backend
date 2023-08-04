@@ -2,16 +2,14 @@ package utils
 
 import (
 	"bytes"
-	"crypto/tls"
+	"context"
 	"fmt"
 	"html/template"
 	"log"
-	"os"
-	"strconv"
 
 	"github.com/chiboycalix/hotel-booking-system-backend/common"
 	"github.com/chiboycalix/hotel-booking-system-backend/models"
-	"gopkg.in/gomail.v2"
+	brevo "github.com/getbrevo/brevo-go/lib"
 )
 
 type forgetPassword struct {
@@ -21,30 +19,34 @@ type forgetPassword struct {
 	LastName  string `json:"lastName" bson:"lastName"`
 }
 
-func SendMailService(user models.User, templatePath string) error {
+func SendMailService(user models.User, templatePath string, subject string) error {
 	var body bytes.Buffer
 	t, err := template.ParseFiles(templatePath)
 	if err != nil {
-		fmt.Println(err, "err")
 		log.Fatal("error parsing template")
 		return err
 	}
 	t.Execute(&body, forgetPassword{ID: user.ID, Email: user.Email, FirstName: user.FirstName, LastName: user.LastName})
-	m := gomail.NewMessage()
-	m.SetHeader("From", common.EMAIL())
-	m.SetHeader("To", user.Email)
-	m.SetHeader("Subject", "Forget Password")
-	m.SetBody("text/html", body.String())
-	port, err := strconv.Atoi(os.Getenv("EMAIL_SERVICE_PORT"))
+
+	var ctx context.Context
+	cfg := brevo.NewConfiguration()
+	cfg.AddDefaultHeader("api-key", common.BrevoAPIKey())
+	br := brevo.NewAPIClient(cfg)
+	_, _, err = br.TransactionalEmailsApi.SendTransacEmail(ctx, brevo.SendSmtpEmail{
+		Sender: &brevo.SendSmtpEmailSender{
+			Name:  "Hotel Booking System",
+			Email: common.SenderEmail(),
+		},
+		To: []brevo.SendSmtpEmailTo{
+			{Name: "chi", Email: user.Email},
+		},
+		HtmlContent: body.String(),
+		Subject:     subject,
+	})
 	if err != nil {
-		fmt.Println("Error:", err)
+		fmt.Println("Error ", err)
 		return err
 	}
-	d := gomail.NewDialer(os.Getenv("EMAIL_SERVICE_HOST"), port, common.EMAIL(), common.EmailPassword())
-	d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
-	if err := d.DialAndSend(m); err != nil {
-		return err
-	}
-	fmt.Println("email sent successfully")
+	fmt.Println("Email sent successfully")
 	return nil
 }

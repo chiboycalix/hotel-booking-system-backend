@@ -24,24 +24,17 @@ func EnvJWTSecret() string {
 	}
 	return os.Getenv("JWT_SECRET")
 }
-func EMAIL() string {
+func SenderEmail() string {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	return os.Getenv("EMAIL")
+	return os.Getenv("SENDER_EMAIL")
 }
-func EmailPassword() string {
+func BrevoAPIKey() string {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	return os.Getenv("EMAIL_PASS")
-}
-func SendGridApiKey() string {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-	return os.Getenv("SENDGRID_API_KEY")
+	return os.Getenv("BREVO_API_KEY")
 }

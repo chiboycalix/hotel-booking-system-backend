@@ -16,9 +16,15 @@ import (
 )
 
 type createUserDTO struct {
-	Email      string `json:"email,omitempty" bson:"email" validate:"required"`
-	Password   string `json:"password,omitempty" bson:"password" validate:"required"`
-	IsVerified bool   `json:"isVerified" bson:"isVerified"`
+	Email       string `json:"email,omitempty" bson:"email" validate:"required"`
+	Password    string `json:"password,omitempty" bson:"password" validate:"required"`
+	Role        string `json:"role" bson:"role"`
+	FirstName   string `json:"firstName" bson:"firstName"`
+	LastName    string `json:"lastName" bson:"lastName"`
+	PhoneNumber int64  `json:"phoneNumber" bson:"phoneNumber"`
+	Location    string `json:"location" bson:"location"`
+	DateOfBirth string `json:"dateOfBirth" bson:"dateOfBirth"`
+	IsVerified  bool   `json:"isVerified" bson:"isVerified"`
 }
 type loginDTO struct {
 	Email    string `json:"email,omitempty" validate:"required"`
@@ -43,15 +49,23 @@ var validate = validator.New()
 func RegisterUser(c *fiber.Ctx) error {
 	var userCollection = common.GetDBCollection("users")
 	var u createUserDTO
+	u.IsVerified = true
+	u.Role = "GUEST"
 	if err := c.BodyParser(&u); err != nil {
 		return c.Status(http.StatusBadRequest).JSON(responses.UserResonse{Status: http.StatusBadRequest, Message: "Invalid request", Data: &fiber.Map{"error": err.Error()}})
 	}
 	// set is verified to true for newly registered user
-	u.IsVerified = true
+
 	if validationErr := validate.Struct(&u); validationErr != nil {
 		for _, err := range validationErr.(validator.ValidationErrors) {
 			return c.Status(http.StatusBadRequest).JSON(responses.UserResonse{Status: http.StatusBadRequest, Message: "Invalid request", Data: &fiber.Map{"error": err.Field() + " is required"}})
 		}
+	}
+
+	var r models.User
+	err := userCollection.FindOne(context.Background(), bson.M{"email": u.Email}).Decode(&r)
+	if err == nil {
+		return c.Status(http.StatusConflict).JSON(responses.UserResonse{Status: http.StatusConflict, Message: "Already Exist", Data: &fiber.Map{"error": "User with this Email already exist"}})
 	}
 
 	pass, hashErr := utils.HashPassword(u.Password)

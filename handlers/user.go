@@ -19,6 +19,7 @@ type UsersDTO struct {
 	PhoneNumber int64  `json:"phoneNumber" bson:"phoneNumber"`
 	Location    string `json:"location" bson:"location"`
 	DateOfBirth string `json:"dateOfBirth" bson:"dateOfBirth"`
+	IsVerified  bool   `json:"isVerified" bson:"isVerified"`
 }
 
 type UpdateUserDTO struct {
@@ -29,8 +30,10 @@ type UpdateUserDTO struct {
 	DateOfBirth string `json:"dateOfBirth" bson:"dateOfBirth"`
 }
 
+const USERS_MODEL = "users"
+
 func GetAllUsers(c *fiber.Ctx) error {
-	coll := common.GetDBCollection("users")
+	coll := common.GetDBCollection(USERS_MODEL)
 
 	// find all users
 	users := make([]UsersDTO, 0)
@@ -52,7 +55,7 @@ func GetAllUsers(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(responses.UserResonse{Status: http.StatusOK, Message: "Users fetched successfully", Data: &fiber.Map{"users": users}})
 }
 func GetUser(c *fiber.Ctx) error {
-	coll := common.GetDBCollection("users")
+	coll := common.GetDBCollection(USERS_MODEL)
 
 	// find the user
 	id := c.Params("id")
@@ -74,7 +77,7 @@ func GetUser(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(responses.UserResonse{Status: http.StatusOK, Message: "User fetched successfully", Data: &fiber.Map{"user": user}})
 }
 func UpdateUser(c *fiber.Ctx) error {
-	userCollection := common.GetDBCollection("users")
+	userCollection := common.GetDBCollection(USERS_MODEL)
 	b := new(UpdateUserDTO)
 	if err := c.BodyParser(b); err != nil {
 		return c.Status(http.StatusBadRequest).JSON(responses.UserResonse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": "Invalid body"}})
@@ -98,7 +101,7 @@ func UpdateUser(c *fiber.Ctx) error {
 }
 func DeleteUser(c *fiber.Ctx) error {
 	id := c.Params("id")
-
+	userCollection := common.GetDBCollection(USERS_MODEL)
 	if id == "" {
 		return c.Status(http.StatusBadRequest).JSON(responses.UserResonse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": "Id is required"}})
 	}
@@ -107,8 +110,7 @@ func DeleteUser(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(responses.UserResonse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": "Invalid Id"}})
 	}
 
-	coll := common.GetDBCollection("users")
-	result, err := coll.DeleteOne(c.Context(), bson.M{"_id": objectId})
+	result, err := userCollection.DeleteOne(c.Context(), bson.M{"_id": objectId})
 
 	if err != nil {
 		return c.Status(http.StatusBadRequest).JSON(responses.UserResonse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": "Fail to delete user"}})

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"os"
 
 	"github.com/chiboycalix/hotel-booking-system-backend/common"
@@ -12,6 +13,7 @@ import (
 )
 
 func main() {
+
 	err := run()
 	if err != nil {
 		panic(err)
@@ -53,8 +55,8 @@ func run() error {
 	// start server
 	var port string
 	if port = os.Getenv("PORT"); port == "" {
-		port = "8010"
+		port = "8011"
 	}
-	app.Listen(":" + port)
+	log.Fatal(app.Listen(":" + port))
 	return nil
 }

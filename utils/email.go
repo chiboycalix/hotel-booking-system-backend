@@ -13,10 +13,11 @@ import (
 )
 
 type forgetPassword struct {
-	ID        string `json:"id" bson:"_id"`
-	Email     string `json:"email" bson:"email"`
-	FirstName string `json:"firstName" bson:"firstName"`
-	LastName  string `json:"lastName" bson:"lastName"`
+	ID          string `json:"id" bson:"_id"`
+	Email       string `json:"email" bson:"email"`
+	FirstName   string `json:"firstName" bson:"firstName"`
+	LastName    string `json:"lastName" bson:"lastName"`
+	FrontendUrl string `json:"frontendUrl" bson:"frontendUrl"`
 }
 
 func SendMailService(user models.User, templatePath string, subject string) error {
@@ -26,7 +27,7 @@ func SendMailService(user models.User, templatePath string, subject string) erro
 		log.Fatal("error parsing template")
 		return err
 	}
-	t.Execute(&body, forgetPassword{ID: user.ID, Email: user.Email, FirstName: user.FirstName, LastName: user.LastName})
+	t.Execute(&body, forgetPassword{ID: user.ID, Email: user.Email, FirstName: user.FirstName, LastName: user.LastName, FrontendUrl: common.FrontendUrl()})
 
 	var ctx context.Context
 	cfg := brevo.NewConfiguration()

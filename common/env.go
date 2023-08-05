@@ -38,3 +38,10 @@ func BrevoAPIKey() string {
 	}
 	return os.Getenv("BREVO_API_KEY")
 }
+func FrontendUrl() string {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	return os.Getenv("FRONTEND_URL")
+}

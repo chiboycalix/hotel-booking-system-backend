@@ -136,7 +136,7 @@ func ForgetPassword(c *fiber.Ctx) error {
 	var result models.User
 	err := userCollection.FindOne(context.Background(), bson.M{"email": f.Email}).Decode(&result)
 	if err != nil {
-		return c.Status(http.StatusBadRequest).JSON(responses.UserResonse{Status: http.StatusBadRequest, Message: "User not found", Data: &fiber.Map{"error": err.Error()}})
+		return c.Status(http.StatusBadRequest).JSON(responses.UserResonse{Status: http.StatusBadRequest, Message: "User not found", Data: &fiber.Map{"error": "User with this email not found"}})
 	}
 
 	// send email
@@ -164,7 +164,7 @@ func ResetPassword(c *fiber.Ctx) error {
 	var result models.User
 	err := userCollection.FindOne(context.Background(), bson.M{"email": r.Email}).Decode(&result)
 	if err != nil {
-		return c.Status(http.StatusBadRequest).JSON(responses.UserResonse{Status: http.StatusBadRequest, Message: "User not found", Data: &fiber.Map{"error": err.Error()}})
+		return c.Status(http.StatusBadRequest).JSON(responses.UserResonse{Status: http.StatusBadRequest, Message: "User not found", Data: &fiber.Map{"error": "User not found"}})
 	}
 
 	objectId, err := primitive.ObjectIDFromHex(result.ID)
@@ -188,10 +188,8 @@ func ResetPassword(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(responses.UserResonse{Status: http.StatusOK, Message: "Password reset was successful", Data: &fiber.Map{"user": updateReq}})
 }
 
-func VerifyUser(c *fiber.Ctx) error {
+func VerifyAccount(c *fiber.Ctx) error {
 	var userCollection = common.GetDBCollection("users")
-	// i think it will be better to get the email from url parameter rather than from the body
-	// email := c.Params("email")
 	var v verifyUserDTO
 
 	if err := c.BodyParser(&v); err != nil {
@@ -214,5 +212,5 @@ func VerifyUser(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).JSON(responses.UserResonse{Status: http.StatusInternalServerError, Message: "Failed to update user", Data: &fiber.Map{"error": err.Error()}})
 	}
 
-	return c.Status(http.StatusOK).JSON(responses.UserResonse{Status: http.StatusOK, Message: "Password reset was successful", Data: &fiber.Map{"user": updateReq}})
+	return c.Status(http.StatusOK).JSON(responses.UserResonse{Status: http.StatusOK, Message: "Your account has been verified", Data: &fiber.Map{"user": updateReq}})
 }

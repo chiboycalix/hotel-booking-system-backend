@@ -13,6 +13,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
 )
 
 type createUserDTO struct {
@@ -45,6 +47,8 @@ type verifyUserDTO struct {
 }
 
 var validate = validator.New()
+var ssoOAuth *oauth2.Config
+var RandomString = "random-text"
 
 func RegisterUser(c *fiber.Ctx) error {
 	var userCollection = common.GetDBCollection("users")
@@ -213,4 +217,17 @@ func VerifyAccount(c *fiber.Ctx) error {
 	}
 
 	return c.Status(http.StatusOK).JSON(responses.UserResonse{Status: http.StatusOK, Message: "Your account has been verified", Data: &fiber.Map{"user": updateReq}})
+}
+
+func SignInWithGoogle(c *fiber.Ctx) error {
+	ssoOAuth = &oauth2.Config{
+		ClientID:     "",
+		ClientSecret: "",
+		Scopes:       []string{},
+		Endpoint:     google.Endpoint,
+	}
+
+	url := ssoOAuth.AuthCodeURL(RandomString)
+	fmt.Println(url, "url")
+	return nil
 }

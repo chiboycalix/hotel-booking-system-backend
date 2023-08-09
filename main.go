@@ -38,24 +38,40 @@ func run() error {
 
 	// create app
 	app := fiber.New()
+	allowOriginsFunc := func(origin string) bool {
+		// Replace this logic with your own rules
+		allowedDomains := []string{
+			"https://localhost:3000",
+			"http://localhost:3000",
+			"https://localhost:3001",
+			"http://localhost:3001",
+		}
+
+		for _, domain := range allowedDomains {
+			if origin == domain {
+				return true
+			}
+		}
+		return false
+	}
 
 	// add basic middleware
 	app.Use(logger.New())
-	app.Use(recover.New())
 	app.Use(cors.New(cors.Config{
-		AllowHeaders:     "Origin,Content-Type,Accept,Content-Length,Accept-Language,Accept-Encoding,Connection,Access-Control-Allow-Origin",
-		AllowOrigins:     "*",
-		AllowCredentials: true,
+		AllowHeaders: "Origin,Content-Type,Accept,Content-Length,Accept-Language,Accept-Encoding,Connection,Access-Control-Allow-Origin,Access-Control-Allow-Credentials",
+		AllowOrigins: "*",
+		// AllowCredentials: true,
+		AllowOriginsFunc: allowOriginsFunc,
 		AllowMethods:     "GET,POST,HEAD,PUT,DELETE,PATCH,OPTIONS",
 	}))
-
+	app.Use(recover.New())
 	// routes
 	router.UserRoute(app)
 	router.AuthRoutes(app)
 	// start server
 	var port string
 	if port = os.Getenv("PORT"); port == "" {
-		port = "8011"
+		port = "3001"
 	}
 	log.Fatal(app.Listen(":" + port))
 	return nil

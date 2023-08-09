@@ -11,7 +11,7 @@ func AuthRoutes(app *fiber.App) {
 	authGroup.Post("/login", handlers.LoginUser)
 	authGroup.Post("/forget-password", handlers.ForgetPassword)
 	authGroup.Post("/reset-password", handlers.ResetPassword)
-	// authGroup.Post("/reset-password/:email", handlers.ResetPassword)
 	authGroup.Post("/verify-account", handlers.VerifyAccount)
-	// authGroup.Post("/verify-account/:email", handlers.VerifyUser)
+	authGroup.Get("/google-signin", handlers.SignInWithGoogle)
+	authGroup.Get("/callback", handlers.GoogleCallback)
 }

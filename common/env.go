@@ -45,3 +45,25 @@ func FrontendUrl() string {
 	}
 	return os.Getenv("FRONTEND_URL")
 }
+
+func GoogleClientID() string {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	return os.Getenv("GOOGLE_CLIENT_ID")
+}
+func GoogleClientSecret() string {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	return os.Getenv("GOOGLE_CLIENT_SECRET")
+}
+func GoogleRedirectURI() string {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	return os.Getenv("GOOGLE_REDIRECT_URL")
+}

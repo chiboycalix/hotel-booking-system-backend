@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"io"
 	"net/http"
 
 	"github.com/chiboycalix/hotel-booking-system-backend/common"
@@ -146,7 +148,7 @@ func ForgetPassword(c *fiber.Ctx) error {
 	// send email
 	err = utils.SendMailService(result, "templates/forget-password.html", "Forget Password")
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(responses.UserResonse{Status: http.StatusInternalServerError, Message: "Error sending mail", Data: &fiber.Map{"error": err.Error()}})
+		return c.Status(http.StatusInternalServerError).JSON(responses.UserResonse{Status: http.StatusInternalServerError, Message: "Error sending mail", Data: &fiber.Map{"error": "Something went wrong, error sending mail"}})
 	}
 
 	return c.Status(http.StatusOK).JSON(responses.UserResonse{Status: http.StatusOK, Message: "Please check your mail for further instructions"})
@@ -154,8 +156,6 @@ func ForgetPassword(c *fiber.Ctx) error {
 
 func ResetPassword(c *fiber.Ctx) error {
 	var userCollection = common.GetDBCollection("users")
-	// i think it will be better to get the email from url parameter rather than from the body
-	// email := c.Params("email")
 	var r resetPasswordDTO
 	if err := c.BodyParser(&r); err != nil {
 		return c.Status(http.StatusBadRequest).JSON(responses.UserResonse{Status: http.StatusBadRequest, Message: "Invalid body", Data: &fiber.Map{"error": err.Error()}})
@@ -221,13 +221,45 @@ func VerifyAccount(c *fiber.Ctx) error {
 
 func SignInWithGoogle(c *fiber.Ctx) error {
 	ssoOAuth = &oauth2.Config{
-		ClientID:     "",
-		ClientSecret: "",
-		Scopes:       []string{},
+		RedirectURL:  common.GoogleRedirectURI(),
+		ClientID:     common.GoogleClientID(),
+		ClientSecret: common.GoogleClientSecret(),
+		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
 		Endpoint:     google.Endpoint,
 	}
 
 	url := ssoOAuth.AuthCodeURL(RandomString)
-	fmt.Println(url, "url")
+	fmt.Println(url)
+	return c.Redirect(url, 302)
+}
+func GoogleCallback(c *fiber.Ctx) error {
+	state := c.Params("state")
+	code := c.Params("code")
+	data, err := getUserData(state, code)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(responses.UserResonse{Status: http.StatusInternalServerError, Message: "Error getting User data", Data: &fiber.Map{"error": "Something went wrong, getting User data"}})
+	}
+	fmt.Println(data, "data")
 	return nil
+}
+func getUserData(state, code string) ([]byte, error) {
+	if state != RandomString {
+		fmt.Println("Invalid state")
+		return nil, errors.New("invalid state")
+	}
+	token, err := ssoOAuth.Exchange(context.Background(), code)
+	if err != nil {
+		return nil, err
+	}
+	response, err := http.Get("https://googleapis.com/oauth2/v2/userinfo?access_token=" + token.AccessToken)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(response)
+	defer response.Body.Close()
+	data, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
 }

@@ -67,3 +67,34 @@ func GoogleRedirectURI() string {
 	}
 	return os.Getenv("GOOGLE_REDIRECT_URL")
 }
+
+func CloudinaryCloudName() string {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	return os.Getenv("CLOUDINARY_CLOUD_NAME")
+}
+
+func CloudinaryAPIKey() string {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	return os.Getenv("CLOUDINARY_API_KEY")
+}
+
+func CloudinaryAPISecret() string {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	return os.Getenv("CLOUDINARY_API_SECRET")
+}
+func CloudinaryUploadFolder() string {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	return os.Getenv("CLOUDINARY_UPLOAD_FOLDER")
+}

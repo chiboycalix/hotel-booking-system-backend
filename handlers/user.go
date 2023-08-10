@@ -39,7 +39,7 @@ func GetAllUsers(c *fiber.Ctx) error {
 	users := make([]UsersDTO, 0)
 	cursor, err := coll.Find(c.Context(), bson.M{})
 	if err != nil {
-		return c.Status(http.StatusBadRequest).JSON(responses.UserResonse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": err.Error()}})
+		return c.Status(http.StatusBadRequest).JSON(responses.APIResponse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": err.Error()}})
 	}
 
 	// iterate over the cursor
@@ -47,12 +47,12 @@ func GetAllUsers(c *fiber.Ctx) error {
 		user := UsersDTO{}
 		err := cursor.Decode(&user)
 		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(responses.UserResonse{Status: http.StatusInternalServerError, Message: "Something went wrong", Data: &fiber.Map{"error": err.Error()}})
+			return c.Status(http.StatusInternalServerError).JSON(responses.APIResponse{Status: http.StatusInternalServerError, Message: "Something went wrong", Data: &fiber.Map{"error": err.Error()}})
 		}
 		users = append(users, user)
 	}
 
-	return c.Status(http.StatusOK).JSON(responses.UserResonse{Status: http.StatusOK, Message: "Users fetched successfully", Data: &fiber.Map{"users": users}})
+	return c.Status(http.StatusOK).JSON(responses.APIResponse{Status: http.StatusOK, Message: "Users fetched successfully", Data: &fiber.Map{"users": users}})
 }
 func GetUser(c *fiber.Ctx) error {
 	coll := common.GetDBCollection(USERS_MODEL)
@@ -60,60 +60,60 @@ func GetUser(c *fiber.Ctx) error {
 	// find the user
 	id := c.Params("id")
 	if id == "" {
-		return c.Status(http.StatusBadRequest).JSON(responses.UserResonse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": "Id is required"}})
+		return c.Status(http.StatusBadRequest).JSON(responses.APIResponse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": "Id is required"}})
 	}
 	objectId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return c.Status(http.StatusBadRequest).JSON(responses.UserResonse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": "Invalid Id"}})
+		return c.Status(http.StatusBadRequest).JSON(responses.APIResponse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": "Invalid Id"}})
 	}
 
 	user := UsersDTO{}
 
 	err = coll.FindOne(c.Context(), bson.M{"_id": objectId}).Decode(&user)
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(responses.UserResonse{Status: http.StatusInternalServerError, Message: "Something went wrong", Data: &fiber.Map{"error": err.Error()}})
+		return c.Status(http.StatusInternalServerError).JSON(responses.APIResponse{Status: http.StatusInternalServerError, Message: "Something went wrong", Data: &fiber.Map{"error": err.Error()}})
 	}
 
-	return c.Status(http.StatusOK).JSON(responses.UserResonse{Status: http.StatusOK, Message: "User fetched successfully", Data: &fiber.Map{"user": user}})
+	return c.Status(http.StatusOK).JSON(responses.APIResponse{Status: http.StatusOK, Message: "User fetched successfully", Data: &fiber.Map{"user": user}})
 }
 func UpdateUser(c *fiber.Ctx) error {
 	userCollection := common.GetDBCollection(USERS_MODEL)
 	b := new(UpdateUserDTO)
 	if err := c.BodyParser(b); err != nil {
-		return c.Status(http.StatusBadRequest).JSON(responses.UserResonse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": "Invalid body"}})
+		return c.Status(http.StatusBadRequest).JSON(responses.APIResponse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": "Invalid body"}})
 	}
 
 	id := c.Params("id")
 	if id == "" {
-		return c.Status(http.StatusBadRequest).JSON(responses.UserResonse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": "Id is required"}})
+		return c.Status(http.StatusBadRequest).JSON(responses.APIResponse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": "Id is required"}})
 	}
 	objectId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return c.Status(http.StatusBadRequest).JSON(responses.UserResonse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": "Invalid Id"}})
+		return c.Status(http.StatusBadRequest).JSON(responses.APIResponse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": "Invalid Id"}})
 	}
 
 	result, err := userCollection.UpdateOne(c.Context(), bson.M{"_id": objectId}, bson.M{"$set": b})
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(responses.UserResonse{Status: http.StatusInternalServerError, Message: "Failed to update user", Data: &fiber.Map{"error": err.Error()}})
+		return c.Status(http.StatusInternalServerError).JSON(responses.APIResponse{Status: http.StatusInternalServerError, Message: "Failed to update user", Data: &fiber.Map{"error": err.Error()}})
 	}
 
-	return c.Status(http.StatusOK).JSON(responses.UserResonse{Status: http.StatusOK, Message: "User update was successful", Data: &fiber.Map{"user": result}})
+	return c.Status(http.StatusOK).JSON(responses.APIResponse{Status: http.StatusOK, Message: "User update was successful", Data: &fiber.Map{"user": result}})
 }
 func DeleteUser(c *fiber.Ctx) error {
 	id := c.Params("id")
 	userCollection := common.GetDBCollection(USERS_MODEL)
 	if id == "" {
-		return c.Status(http.StatusBadRequest).JSON(responses.UserResonse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": "Id is required"}})
+		return c.Status(http.StatusBadRequest).JSON(responses.APIResponse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": "Id is required"}})
 	}
 	objectId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return c.Status(http.StatusBadRequest).JSON(responses.UserResonse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": "Invalid Id"}})
+		return c.Status(http.StatusBadRequest).JSON(responses.APIResponse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": "Invalid Id"}})
 	}
 
 	result, err := userCollection.DeleteOne(c.Context(), bson.M{"_id": objectId})
 
 	if err != nil {
-		return c.Status(http.StatusBadRequest).JSON(responses.UserResonse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": "Fail to delete user"}})
+		return c.Status(http.StatusBadRequest).JSON(responses.APIResponse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": "Fail to delete user"}})
 	}
-	return c.Status(http.StatusOK).JSON(responses.UserResonse{Status: http.StatusOK, Message: "User deleted successfully", Data: &fiber.Map{"data": result}})
+	return c.Status(http.StatusOK).JSON(responses.APIResponse{Status: http.StatusOK, Message: "User deleted successfully", Data: &fiber.Map{"data": result}})
 }

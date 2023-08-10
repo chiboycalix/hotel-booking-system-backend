@@ -58,9 +58,9 @@ func run() error {
 	// add basic middleware
 	app.Use(logger.New())
 	app.Use(cors.New(cors.Config{
-		AllowHeaders: "Origin,Content-Type,Accept,Content-Length,Accept-Language,Accept-Encoding,Connection,Access-Control-Allow-Origin,Access-Control-Allow-Credentials",
-		AllowOrigins: "*",
-		// AllowCredentials: true,
+		AllowHeaders:     "Origin,Content-Type,Accept,Content-Length,Accept-Language,Accept-Encoding,Connection,Access-Control-Allow-Origin,Access-Control-Allow-Credentials",
+		AllowOrigins:     "*",
+		AllowCredentials: true,
 		AllowOriginsFunc: allowOriginsFunc,
 		AllowMethods:     "GET,POST,HEAD,PUT,DELETE,PATCH,OPTIONS",
 	}))
@@ -68,6 +68,7 @@ func run() error {
 	// routes
 	router.UserRoute(app)
 	router.AuthRoutes(app)
+	router.ListingRoutes(app)
 	// start server
 	var port string
 	if port = os.Getenv("PORT"); port == "" {

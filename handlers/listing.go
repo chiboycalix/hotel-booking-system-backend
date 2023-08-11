@@ -118,8 +118,8 @@ func GetAllListings(c *fiber.Ctx) error {
 
 func UpdateListing(c *fiber.Ctx) error {
 	listingCollection := common.GetDBCollection(LISTING_MODEL)
-	b := new(UpdateListingDTO)
-	if err := c.BodyParser(b); err != nil {
+	var b UpdateListingDTO
+	if err := c.BodyParser(&b); err != nil {
 		return c.Status(http.StatusBadRequest).JSON(responses.APIResponse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": "Invalid body"}})
 	}
 
@@ -150,22 +150,32 @@ func UpdateListing(c *fiber.Ctx) error {
 	if b.RoomPrice == 0 {
 		b.RoomPrice = listing.RoomPrice
 	}
-	formHeader, err := c.FormFile("roomImage")
-	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(responses.APIResponse{Status: http.StatusInternalServerError, Message: "Something went wrong", Data: &fiber.Map{"error": err.Error()}})
+
+	if b.RoomImage != "" {
+		var url models.Url
+		url.Url = b.RoomImage
+		uploadUrl, err := utils.NewMediaUpload().RemoteUpload(url)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(responses.APIResponse{Status: http.StatusInternalServerError, Message: "Something went wrong", Data: &fiber.Map{"error": err.Error()}})
+		}
+		b.RoomImage = uploadUrl
+	} else {
+		formHeader, err := c.FormFile("roomImage")
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(responses.APIResponse{Status: http.StatusInternalServerError, Message: "Something went wrong", Data: &fiber.Map{"error": err.Error()}})
+		}
+		formFile, err := formHeader.Open()
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(responses.APIResponse{Status: http.StatusInternalServerError, Message: "Something went wrong", Data: &fiber.Map{"error": err.Error()}})
+		}
+		// if image
+		uploadUrl, err := utils.NewMediaUpload().FileUpload(models.File{File: formFile})
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(responses.APIResponse{Status: http.StatusInternalServerError, Message: "Something went wrong", Data: &fiber.Map{"error": err.Error()}})
+		}
+		b.RoomImage = uploadUrl
 	}
 
-	formFile, err := formHeader.Open()
-	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(responses.APIResponse{Status: http.StatusInternalServerError, Message: "Something went wrong", Data: &fiber.Map{"error": err.Error()}})
-	}
-
-	uploadUrl, err := utils.NewMediaUpload().FileUpload(models.File{File: formFile})
-	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(responses.APIResponse{Status: http.StatusInternalServerError, Message: "Something went wrong", Data: &fiber.Map{"error": err.Error()}})
-	}
-
-	b.RoomImage = uploadUrl
 	result, err := listingCollection.UpdateOne(c.Context(), bson.M{"_id": objectId}, bson.M{"$set": b})
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(responses.APIResponse{Status: http.StatusInternalServerError, Message: "Failed to update listing", Data: &fiber.Map{"error": err.Error()}})

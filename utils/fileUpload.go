@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/chiboycalix/hotel-booking-system-backend/common"
@@ -39,6 +40,7 @@ func (*media) FileUpload(file models.File) (string, error) {
 	return uploadUrl, nil
 }
 func (*media) RemoteUpload(url models.Url) (string, error) {
+	fmt.Println(url.Url, "url")
 	err := validate.Struct(url)
 	if err != nil {
 		return "", err

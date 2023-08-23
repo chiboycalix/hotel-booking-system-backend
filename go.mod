@@ -8,7 +8,10 @@ require (
 	github.com/go-playground/validator/v10 v10.14.1
 	github.com/gofiber/fiber/v2 v2.48.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
+	github.com/gorilla/pat v1.0.1
 	github.com/joho/godotenv v1.5.1
+	github.com/markbates/goth v1.77.0
+	github.com/shareed2k/goth_fiber v0.2.9
 	go.mongodb.org/mongo-driver v1.12.0
 	golang.org/x/crypto v0.12.0
 	golang.org/x/oauth2 v0.9.0
@@ -25,7 +28,11 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/uuid v1.3.0 // indirect
+	github.com/gorilla/context v1.1.1 // indirect
+	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/gorilla/schema v1.2.0 // indirect
+	github.com/gorilla/securecookie v1.1.1 // indirect
+	github.com/gorilla/sessions v1.1.1 // indirect
 	github.com/klauspost/compress v1.16.6 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect

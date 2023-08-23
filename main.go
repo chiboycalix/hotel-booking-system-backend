@@ -10,6 +10,8 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/markbates/goth"
+	"github.com/markbates/goth/providers/google"
 )
 
 func main() {
@@ -38,30 +40,15 @@ func run() error {
 
 	// create app
 	app := fiber.New()
-	allowOriginsFunc := func(origin string) bool {
-		// Replace this logic with your own rules
-		allowedDomains := []string{
-			"https://localhost:3000",
-			"http://localhost:3000",
-			"https://localhost:3001",
-			"http://localhost:3001",
-		}
-
-		for _, domain := range allowedDomains {
-			if origin == domain {
-				return true
-			}
-		}
-		return false
-	}
-
+	goth.UseProviders(
+		google.New(os.Getenv("GOOGLE_CLIENT_ID"), os.Getenv("GOOGLE_CLIENT_SECRET"), "https://localhost:3001/callback"),
+	)
 	// add basic middleware
 	app.Use(logger.New())
 	app.Use(cors.New(cors.Config{
 		AllowHeaders:     "Origin,Content-Type,Accept,Content-Length,Accept-Language,Accept-Encoding,Connection,Access-Control-Allow-Origin,Access-Control-Allow-Credentials",
 		AllowOrigins:     "*",
 		AllowCredentials: true,
-		AllowOriginsFunc: allowOriginsFunc,
 		AllowMethods:     "GET,POST,HEAD,PUT,DELETE,PATCH,OPTIONS",
 	}))
 	app.Use(recover.New())

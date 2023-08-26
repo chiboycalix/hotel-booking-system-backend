@@ -4,18 +4,18 @@ import (
 	"log"
 	"os"
 
-	"github.com/chiboycalix/hotel-booking-system-backend/common"
-	"github.com/chiboycalix/hotel-booking-system-backend/router"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/providers/google"
+
+	"github.com/chiboycalix/hotel-booking-system-backend/common"
+	"github.com/chiboycalix/hotel-booking-system-backend/router"
 )
 
 func main() {
-
 	err := run()
 	if err != nil {
 		panic(err)
@@ -41,7 +41,11 @@ func run() error {
 	// create app
 	app := fiber.New()
 	goth.UseProviders(
-		google.New(os.Getenv("GOOGLE_CLIENT_ID"), os.Getenv("GOOGLE_CLIENT_SECRET"), "https://localhost:3001/callback"),
+		google.New(
+			os.Getenv("GOOGLE_CLIENT_ID"),
+			os.Getenv("GOOGLE_CLIENT_SECRET"),
+			"https://localhost:3001/callback",
+		),
 	)
 	// add basic middleware
 	app.Use(logger.New())

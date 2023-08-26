@@ -17,6 +17,7 @@ func LoadEnv() error {
 	}
 	return nil
 }
+
 func EnvJWTSecret() string {
 	err := godotenv.Load()
 	if err != nil {
@@ -24,6 +25,7 @@ func EnvJWTSecret() string {
 	}
 	return os.Getenv("JWT_SECRET")
 }
+
 func SenderEmail() string {
 	err := godotenv.Load()
 	if err != nil {
@@ -31,6 +33,7 @@ func SenderEmail() string {
 	}
 	return os.Getenv("SENDER_EMAIL")
 }
+
 func BrevoAPIKey() string {
 	err := godotenv.Load()
 	if err != nil {
@@ -38,6 +41,7 @@ func BrevoAPIKey() string {
 	}
 	return os.Getenv("BREVO_API_KEY")
 }
+
 func FrontendUrl() string {
 	err := godotenv.Load()
 	if err != nil {
@@ -53,6 +57,7 @@ func GoogleClientID() string {
 	}
 	return os.Getenv("GOOGLE_CLIENT_ID")
 }
+
 func GoogleClientSecret() string {
 	err := godotenv.Load()
 	if err != nil {
@@ -60,6 +65,7 @@ func GoogleClientSecret() string {
 	}
 	return os.Getenv("GOOGLE_CLIENT_SECRET")
 }
+
 func GoogleRedirectURI() string {
 	err := godotenv.Load()
 	if err != nil {
@@ -91,6 +97,7 @@ func CloudinaryAPISecret() string {
 	}
 	return os.Getenv("CLOUDINARY_API_SECRET")
 }
+
 func CloudinaryUploadFolder() string {
 	err := godotenv.Load()
 	if err != nil {

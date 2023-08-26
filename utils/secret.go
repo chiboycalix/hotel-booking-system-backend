@@ -3,9 +3,10 @@ package utils
 import (
 	"time"
 
-	"github.com/chiboycalix/hotel-booking-system-backend/common"
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
+
+	"github.com/chiboycalix/hotel-booking-system-backend/common"
 )
 
 type JWTClaim struct {

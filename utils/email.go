@@ -7,16 +7,17 @@ import (
 	"html/template"
 	"log"
 
+	brevo "github.com/getbrevo/brevo-go/lib"
+
 	"github.com/chiboycalix/hotel-booking-system-backend/common"
 	"github.com/chiboycalix/hotel-booking-system-backend/models"
-	brevo "github.com/getbrevo/brevo-go/lib"
 )
 
 type forgetPassword struct {
-	ID          string `json:"id" bson:"_id"`
-	Email       string `json:"email" bson:"email"`
-	FirstName   string `json:"firstName" bson:"firstName"`
-	LastName    string `json:"lastName" bson:"lastName"`
+	ID          string `json:"id"          bson:"_id"`
+	Email       string `json:"email"       bson:"email"`
+	FirstName   string `json:"firstName"   bson:"firstName"`
+	LastName    string `json:"lastName"    bson:"lastName"`
 	FrontendUrl string `json:"frontendUrl" bson:"frontendUrl"`
 }
 
@@ -27,7 +28,16 @@ func SendMailService(user models.User, templatePath string, subject string) erro
 		log.Fatal("error parsing template")
 		return err
 	}
-	t.Execute(&body, forgetPassword{ID: user.ID, Email: user.Email, FirstName: user.FirstName, LastName: user.LastName, FrontendUrl: common.FrontendUrl()})
+	t.Execute(
+		&body,
+		forgetPassword{
+			ID:          user.ID,
+			Email:       user.Email,
+			FirstName:   user.FirstName,
+			LastName:    user.LastName,
+			FrontendUrl: common.FrontendUrl(),
+		},
+	)
 
 	var ctx context.Context
 	cfg := brevo.NewConfiguration()

@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/chiboycalix/hotel-booking-system-backend/common"
-	"github.com/chiboycalix/hotel-booking-system-backend/models"
 	"github.com/cloudinary/cloudinary-go"
 	"github.com/cloudinary/cloudinary-go/api/uploader"
 	"github.com/go-playground/validator/v10"
+
+	"github.com/chiboycalix/hotel-booking-system-backend/common"
+	"github.com/chiboycalix/hotel-booking-system-backend/models"
 )
 
 var validate = validator.New()
@@ -26,19 +27,20 @@ func NewMediaUpload() mediaUpload {
 }
 
 func (*media) FileUpload(file models.File) (string, error) {
-	//validate
+	// validate
 	err := validate.Struct(file)
 	if err != nil {
 		return "", err
 	}
 
-	//upload
+	// upload
 	uploadUrl, err := ImageUploadHelper(file.File)
 	if err != nil {
 		return "", err
 	}
 	return uploadUrl, nil
 }
+
 func (*media) RemoteUpload(url models.Url) (string, error) {
 	fmt.Println(url.Url, "url")
 	err := validate.Struct(url)
@@ -57,14 +59,22 @@ func ImageUploadHelper(input interface{}) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	//create cloudinary instance
-	cld, err := cloudinary.NewFromParams(common.CloudinaryCloudName(), common.CloudinaryAPIKey(), common.CloudinaryAPISecret())
+	// create cloudinary instance
+	cld, err := cloudinary.NewFromParams(
+		common.CloudinaryCloudName(),
+		common.CloudinaryAPIKey(),
+		common.CloudinaryAPISecret(),
+	)
 	if err != nil {
 		return "", err
 	}
 
-	//upload file
-	uploadParam, err := cld.Upload.Upload(ctx, input, uploader.UploadParams{Folder: common.CloudinaryUploadFolder()})
+	// upload file
+	uploadParam, err := cld.Upload.Upload(
+		ctx,
+		input,
+		uploader.UploadParams{Folder: common.CloudinaryUploadFolder()},
+	)
 	if err != nil {
 		return "", err
 	}

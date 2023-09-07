@@ -44,7 +44,7 @@ func run() error {
 		google.New(
 			os.Getenv("GOOGLE_CLIENT_ID"),
 			os.Getenv("GOOGLE_CLIENT_SECRET"),
-			"https://localhost:3001/callback",
+			"https://localhost:8011/callback",
 		),
 	)
 	// add basic middleware
@@ -63,7 +63,7 @@ func run() error {
 	// start server
 	var port string
 	if port = os.Getenv("PORT"); port == "" {
-		port = "3001"
+		port = "8011"
 	}
 	log.Fatal(app.Listen(":" + port))
 	return nil

@@ -11,4 +11,5 @@ type User struct {
 	Location    string `json:"location"    bson:"location"`
 	DateOfBirth string `json:"dateOfBirth" bson:"dateOfBirth"`
 	IsVerified  bool   `json:"isVerified"  bson:"isVerified"`
+	IsAdmin     bool   `json:"isAdmin"     bson:"isAdmin"`
 }

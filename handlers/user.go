@@ -9,6 +9,7 @@ import (
 
 	"github.com/chiboycalix/hotel-booking-system-backend/common"
 	"github.com/chiboycalix/hotel-booking-system-backend/responses"
+	"github.com/chiboycalix/hotel-booking-system-backend/utils"
 )
 
 type UsersDTO struct {
@@ -35,6 +36,16 @@ const USERS_MODEL = "users"
 
 func GetAllUsers(c *fiber.Ctx) error {
 	coll := common.GetDBCollection(USERS_MODEL)
+	var tokenString = c.Get("Authorization")
+	isAdmin, err := utils.IsAdmin(tokenString, common.EnvJWTSecret(), c)
+	if err != nil {
+		return c.Status(http.StatusBadRequest).
+			JSON(responses.APIResponse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": err.Error()}})
+	}
+	if !isAdmin {
+		return c.Status(http.StatusUnauthorized).
+			JSON(responses.APIResponse{Status: http.StatusUnauthorized, Message: "Unauthorized", Data: &fiber.Map{"error": "Unauthorized"}})
+	}
 
 	// find all users
 	users := make([]UsersDTO, 0)
@@ -118,6 +129,16 @@ func UpdateUser(c *fiber.Ctx) error {
 func DeleteUser(c *fiber.Ctx) error {
 	id := c.Params("id")
 	userCollection := common.GetDBCollection(USERS_MODEL)
+	var tokenString = c.Get("Authorization")
+	isAdmin, err := utils.IsAdmin(tokenString, common.EnvJWTSecret(), c)
+	if err != nil {
+		return c.Status(http.StatusBadRequest).
+			JSON(responses.APIResponse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": err.Error()}})
+	}
+	if !isAdmin {
+		return c.Status(http.StatusUnauthorized).
+			JSON(responses.APIResponse{Status: http.StatusUnauthorized, Message: "Unauthorized", Data: &fiber.Map{"error": "Unauthorized"}})
+	}
 	if id == "" {
 		return c.Status(http.StatusBadRequest).
 			JSON(responses.APIResponse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": "Id is required"}})

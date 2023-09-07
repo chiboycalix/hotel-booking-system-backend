@@ -138,7 +138,16 @@ func UpdateListing(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).
 			JSON(responses.APIResponse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": "Invalid body"}})
 	}
-
+	var tokenString = c.Get("Authorization")
+	isAdmin, err := utils.IsAdmin(tokenString, common.EnvJWTSecret(), c)
+	if err != nil {
+		return c.Status(http.StatusBadRequest).
+			JSON(responses.APIResponse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": err.Error()}})
+	}
+	if !isAdmin {
+		return c.Status(http.StatusUnauthorized).
+			JSON(responses.APIResponse{Status: http.StatusUnauthorized, Message: "Unauthorized", Data: &fiber.Map{"error": "Unauthorized"}})
+	}
 	id := c.Params("id")
 	if id == "" {
 		return c.Status(http.StatusBadRequest).
@@ -213,6 +222,16 @@ func UpdateListing(c *fiber.Ctx) error {
 func DeleteListing(c *fiber.Ctx) error {
 	id := c.Params("id")
 	listingCollection := common.GetDBCollection(LISTING_MODEL)
+	var tokenString = c.Get("Authorization")
+	isAdmin, err := utils.IsAdmin(tokenString, common.EnvJWTSecret(), c)
+	if err != nil {
+		return c.Status(http.StatusBadRequest).
+			JSON(responses.APIResponse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": err.Error()}})
+	}
+	if !isAdmin {
+		return c.Status(http.StatusUnauthorized).
+			JSON(responses.APIResponse{Status: http.StatusUnauthorized, Message: "Unauthorized", Data: &fiber.Map{"error": "Unauthorized"}})
+	}
 	if id == "" {
 		return c.Status(http.StatusBadRequest).
 			JSON(responses.APIResponse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": "Id is required"}})

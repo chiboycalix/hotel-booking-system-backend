@@ -30,6 +30,7 @@ type createUserDTO struct {
 	Location    string `json:"location"           bson:"location"`
 	DateOfBirth string `json:"dateOfBirth"        bson:"dateOfBirth"`
 	IsVerified  bool   `json:"isVerified"         bson:"isVerified"`
+	IsAdmin     bool   `json:"isAdmin"            bson:"isAdmin"`
 }
 type loginDTO struct {
 	Email    string `json:"email,omitempty"    validate:"required"`
@@ -86,13 +87,14 @@ func RegisterUser(c *fiber.Ctx) error {
 			JSON(responses.APIResponse{Status: http.StatusBadRequest, Message: "Failed to hash password", Data: &fiber.Map{"error": hashErr.Error()}})
 	}
 	u.Password = pass
+	u.IsAdmin = false
 	result, err := userCollection.InsertOne(c.Context(), u)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).
 			JSON(responses.APIResponse{Status: http.StatusInternalServerError, Message: "Something went wrong", Data: &fiber.Map{"error": err.Error()}})
 	}
 	// convert interface to string
-	jwt, err := utils.GenerateJWT(fmt.Sprint(result.InsertedID))
+	jwt, err := utils.GenerateJWT(fmt.Sprint(result.InsertedID), u.IsAdmin)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).
 			JSON(responses.APIResponse{Status: http.StatusInternalServerError, Message: "Failed to generate jwt", Data: &fiber.Map{"error": err.Error()}})
@@ -135,7 +137,7 @@ func LoginUser(c *fiber.Ctx) error {
 			JSON(responses.APIResponse{Status: http.StatusBadRequest, Message: "Not Verified", Data: &fiber.Map{"error": "User is not Verified"}})
 	}
 
-	jwt, err := utils.GenerateJWT(result.ID)
+	jwt, err := utils.GenerateJWT(result.ID, result.IsAdmin)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).
 			JSON(responses.APIResponse{Status: http.StatusInternalServerError, Message: "Failed to generate jwt", Data: &fiber.Map{"error": err.Error()}})

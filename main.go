@@ -61,6 +61,7 @@ func run() error {
 	router.AuthRoutes(app)
 	router.ListingRoutes(app)
 	router.RoomRoutes(app)
+	router.BookingsRoutes(app)
 	// start server
 	var port string
 	if port = os.Getenv("PORT"); port == "" {

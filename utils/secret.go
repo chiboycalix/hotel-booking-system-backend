@@ -65,3 +65,11 @@ func IsAdmin(tokenString string, secretKey string, c *fiber.Ctx) (bool, error) {
 	}
 	return claims.IsAdmin, nil
 }
+
+func GetUserID(tokenString string, secretKey string, c *fiber.Ctx) (string, error) {
+	claims, err := ValidateToken(tokenString, secretKey, c)
+	if err != nil {
+		return "", err
+	}
+	return claims.ID, nil
+}

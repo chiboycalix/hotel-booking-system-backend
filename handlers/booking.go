@@ -19,27 +19,30 @@ import (
 var BOOKING_MODEL = "bookings"
 
 type CreateBookingDTO struct {
-	RoomID      string    `json:"roomId" bson:"roomId" validate:"required"`
-	GuestID     string    `json:"guestId" bson:"guestId"`
-	CheckIn     time.Time `json:"checkIn" bson:"checkIn" validate:"required"`
-	CheckOut    time.Time `json:"checkOut" bson:"checkOut" validate:"required"`
-	BookingDate time.Time `json:"bookingDate" bson:"bookingDate" validate:"required"`
+	RoomID             string    `json:"roomId" bson:"roomId" validate:"required"`
+	GuestID            string    `json:"guestId" bson:"guestId"`
+	CheckIn            time.Time `json:"checkIn" bson:"checkIn" validate:"required"`
+	CheckOut           time.Time `json:"checkOut" bson:"checkOut" validate:"required"`
+	BookingDate        time.Time `json:"bookingDate" bson:"bookingDate"`
+	BookingUpdatedDate time.Time `json:"bookingUpdatedDate" bson:"bookingUpdatedDate"`
 }
 
 type UpdateBookingDTO struct {
-	RoomID      string    `json:"roomId" bson:"roomId" validate:"required"`
-	CheckIn     time.Time `json:"checkIn" bson:"checkIn" validate:"required"`
-	CheckOut    time.Time `json:"checkOut" bson:"checkOut" validate:"required"`
-	BookingDate time.Time `json:"bookingDate" bson:"bookingDate" validate:"required"`
+	RoomID             string    `json:"roomId" bson:"roomId" validate:"required"`
+	CheckIn            time.Time `json:"checkIn" bson:"checkIn" validate:"required"`
+	CheckOut           time.Time `json:"checkOut" bson:"checkOut" validate:"required"`
+	BookingDate        time.Time `json:"bookingDate" bson:"bookingDate" validate:"required"`
+	BookingUpdatedDate time.Time `json:"bookingUpdatedDate" bson:"bookingUpdatedDate"`
 }
 
 type GetBookingDTO struct {
-	ID          string    `json:"id" bson:"_id"`
-	RoomID      string    `json:"roomId" bson:"roomId"`
-	GuestID     string    `json:"guestId" bson:"guestId"`
-	CheckIn     time.Time `json:"checkIn" bson:"checkIn"`
-	CheckOut    time.Time `json:"checkOut" bson:"checkOut"`
-	BookingDate time.Time `json:"bookingDate" bson:"bookingDate"`
+	ID                 string    `json:"id" bson:"_id"`
+	RoomID             string    `json:"roomId" bson:"roomId"`
+	GuestID            string    `json:"guestId" bson:"guestId"`
+	CheckIn            time.Time `json:"checkIn" bson:"checkIn"`
+	CheckOut           time.Time `json:"checkOut" bson:"checkOut"`
+	BookingDate        time.Time `json:"bookingDate" bson:"bookingDate"`
+	BookingUpdatedDate time.Time `json:"bookingUpdatedDate" bson:"bookingUpdatedDate"`
 }
 
 func CreateBooking(c *fiber.Ctx) error {
@@ -67,6 +70,8 @@ func CreateBooking(c *fiber.Ctx) error {
 	}
 
 	createBookingDTO.GuestID = userId
+	createBookingDTO.BookingDate = time.Now()
+	createBookingDTO.BookingUpdatedDate = time.Now()
 	result, err := bookingCollection.InsertOne(c.Context(), createBookingDTO)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).
@@ -148,12 +153,23 @@ func UpdateBooking(c *fiber.Ctx) error {
 				JSON(responses.APIResponse{Status: http.StatusBadRequest, Message: "Invalid request", Data: &fiber.Map{"error": err.Field() + " is required"}})
 		}
 	}
+
 	objectId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).
 			JSON(responses.APIResponse{Status: http.StatusBadRequest, Message: "Something went wrong", Data: &fiber.Map{"error": "Invalid Id"}})
 	}
 
+	booking := GetBookingDTO{}
+
+	err = bookingCollection.FindOne(c.Context(), bson.M{"_id": objectId}).Decode(&booking)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).
+			JSON(responses.APIResponse{Status: http.StatusInternalServerError, Message: "Something went wrong", Data: &fiber.Map{"error": err.Error()}})
+	}
+
+	b.BookingUpdatedDate = time.Now()
+	b.BookingDate = booking.BookingDate
 	result, err := bookingCollection.UpdateOne(c.Context(), bson.M{"_id": objectId}, bson.M{"$set": b})
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).
